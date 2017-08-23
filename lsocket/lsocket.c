@@ -945,8 +945,13 @@ static int lsocket_sock_recv(lua_State *L)
 
 	int nrd = recv(sock->sockfd, buf, howmuch, 0);
 	if (nrd < 0) {
-		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			lua_pushboolean(L, 0);
+#ifdef _MSC_VER
+    if (WSAEWOULDBLOCK == WSAGetLastError())
+      lua_pushboolean(L, 0);
+#else
+    if (errno == EAGAIN || errno == EWOULDBLOCK)
+      lua_pushboolean(L, 0);
+#endif // !_MSC_VER
 		else
 			return lsocket_error(L, strerror(errno));
 	} else if (nrd == 0) {
@@ -1012,8 +1017,13 @@ static int lsocket_sock_recvfrom(lua_State *L)
 
 	int nrd = recvfrom(sock->sockfd, buf, howmuch, 0, sa, &slen);
 	if (nrd < 0) {
+#ifdef _MSC_VER
+    if (WSAEWOULDBLOCK == WSAGetLastError())
+      lua_pushboolean(L, 0);
+#else
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
 			lua_pushboolean(L, 0);
+#endif
 		else
 			return lsocket_error(L, strerror(errno));
 	} else if (nrd == 0) {
@@ -1079,8 +1089,13 @@ static int lsocket_sock_send(lua_State *L)
 	#endif
 		
 	if (nwr < 0) {
+#ifdef _MSC_VER
+    if (WSAEWOULDBLOCK == WSAGetLastError())
+      lua_pushboolean(L, 0);
+#else
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
 			lua_pushboolean(L, 0);
+#endif
 		else
 			return lsocket_error(L, strerror(errno));
 	} else {
@@ -1140,8 +1155,13 @@ static int lsocket_sock_sendto(lua_State *L)
 	#endif
 	
 	if (nwr < 0) {
+#ifdef _MSC_VER
+    if (WSAEWOULDBLOCK == WSAGetLastError())
+      lua_pushboolean(L, 0);
+#else
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
 			lua_pushboolean(L, 0);
+#endif
 		else
 			return lsocket_error(L, strerror(errno));
 	} else {
